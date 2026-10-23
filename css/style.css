@@ -1,0 +1,226 @@
+/* ===========================================================
+   末日晶核 — 像素風共用樣式
+   =========================================================== */
+
+@font-face {
+  font-family: 'Zpix';
+  src: url('https://cdn.jsdelivr.net/gh/SolidZORO/zpix-pixel-font@master/dist/Zpix.woff2') format('woff2');
+  font-display: swap;
+}
+
+:root {
+  --font-cn: 'Zpix', 'Noto Sans TC', monospace;
+  --font-en: 'Press Start 2P', monospace;
+
+  --ui-face: #c6c6c6;
+  --ui-light: #ffffff;
+  --ui-dark: #555555;
+  --ui-shadow: #8b8b8b;
+  --ui-highlight: #e0e0e0;
+
+  /* 貼圖由 main.js / game.js 動態填入 */
+  --tex-grass: none;
+  --tex-grass-side: none;
+  --tex-dirt: none;
+  --tex-stone: none;
+  --tex-diamond: none;
+
+  /* 晶核品質色 */
+  --core-white: #e0e0e0;
+  --core-blue: #4a90d9;
+  --core-purple: #9b59b6;
+  --core-red: #e74c3c;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  font-family: var(--font-cn);
+  color: #2b2b2b;
+  background: #1a1a1a;
+  -webkit-font-smoothing: none;
+  font-smooth: never;
+}
+
+img, canvas { image-rendering: pixelated; }
+
+/* ===========================================================
+   共用像素元件
+   =========================================================== */
+
+.mc-btn {
+  display: inline-block;
+  font-family: var(--font-cn);
+  font-size: 15px;
+  letter-spacing: 1px;
+  line-height: 1;
+  color: #ffffff;
+  text-decoration: none;
+  text-shadow: 2px 2px 0 rgba(0, 0, 0, .55);
+  background: #7a7a7a;
+  padding: 14px 24px;
+  border: 2px solid #000;
+  box-shadow:
+    inset 2px 2px 0 rgba(255, 255, 255, .45),
+    inset -2px -2px 0 rgba(0, 0, 0, .45),
+    4px 4px 0 rgba(0, 0, 0, .25);
+  cursor: pointer;
+  transition: background .12s ease;
+  user-select: none;
+}
+.mc-btn:hover { background: #8794b3; }
+.mc-btn:active {
+  transform: translate(2px, 2px);
+  box-shadow:
+    inset -2px -2px 0 rgba(255, 255, 255, .30),
+    inset 2px 2px 0 rgba(0, 0, 0, .45);
+}
+.mc-btn--lg { font-size: 20px; padding: 18px 36px; }
+.mc-btn:disabled {
+  background: #555;
+  color: #999;
+  cursor: not-allowed;
+}
+
+.mc-panel {
+  background: var(--ui-face);
+  border: 4px solid;
+  border-color: var(--ui-light) var(--ui-dark) var(--ui-dark) var(--ui-light);
+  box-shadow:
+    inset -4px -4px 0 var(--ui-shadow),
+    inset  4px  4px 0 var(--ui-highlight);
+  padding: 20px;
+}
+
+/* ===========================================================
+   導覽列
+   =========================================================== */
+.site-nav {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 24px;
+  background: rgba(18, 18, 18, .82);
+  border-bottom: 4px solid #000;
+  backdrop-filter: blur(6px);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 18px;
+  color: #fff;
+  text-decoration: none;
+  text-shadow: 2px 2px 0 rgba(0, 0, 0, .7);
+}
+.brand-cube {
+  width: 24px;
+  height: 24px;
+  background-image: var(--tex-grass-side);
+  background-size: 100% 100%;
+  image-rendering: pixelated;
+  border: 2px solid #000;
+  box-shadow: inset -2px -2px 0 rgba(0, 0, 0, .35),
+              inset  2px  2px 0 rgba(255, 255, 255, .35);
+}
+
+.nav-links { display: flex; gap: 6px; }
+.nav-links a {
+  font-size: 14px;
+  color: #cfcfcf;
+  text-decoration: none;
+  padding: 8px 14px;
+  border: 2px solid transparent;
+  text-shadow: 2px 2px 0 rgba(0, 0, 0, .6);
+  transition: color .12s, background .12s;
+}
+.nav-links a:hover { color: #fff; background: rgba(255, 255, 255, .12); }
+.nav-links a.active {
+  color: #f7d06b;
+  border-color: #f7d06b;
+  background: rgba(0, 0, 0, .35);
+}
+
+/* ===========================================================
+   Hero
+   =========================================================== */
+.hero {
+  position: relative;
+  min-height: calc(100vh - 68px);
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  padding: 60px 20px 100px;
+  text-align: center;
+}
+
+.hero-inner {
+  position: relative;
+  z-index: 2;
+  max-width: 720px;
+}
+
+.hero-title {
+  font-family: var(--font-cn);
+  font-size: clamp(42px, 9vw, 96px);
+  letter-spacing: 6px;
+  margin: 0 0 16px;
+  color: #f7d06b;
+  text-shadow:
+    -3px 0 0 #3b2a12,  3px 0 0 #3b2a12,
+     0 -3px 0 #3b2a12,  0 3px 0 #3b2a12,
+    -3px -3px 0 #3b2a12, 3px -3px 0 #3b2a12,
+    -3px  3px 0 #3b2a12, 3px  3px 0 #3b2a12,
+     0 10px 0 rgba(0, 0, 0, .28);
+}
+
+.hero-sub {
+  font-size: 16px;
+  line-height: 1.9;
+  color: #ffffff;
+  text-shadow: 2px 2px 0 rgba(0, 0, 0, .45);
+  margin: 0 0 32px;
+}
+
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  justify-content: center;
+  margin-bottom: 28px;
+}
+
+/* ===========================================================
+   頁尾
+   =========================================================== */
+.site-footer {
+  padding: 28px 24px;
+  text-align: center;
+  background: #111;
+  border-top: 4px solid #000;
+}
+.site-footer p {
+  margin: 0;
+  font-size: 12px;
+  letter-spacing: 1px;
+  color: #8a8a8a;
+}
+
+/* ===========================================================
+   RWD
+   =========================================================== */
+@media (max-width: 760px) {
+  .site-nav { flex-direction: column; gap: 10px; padding: 12px 16px; }
+  .nav-links { flex-wrap: wrap; justify-content: center; }
+  .nav-links a { font-size: 13px; padding: 6px 10px; }
+  .hero-title { letter-spacing: 2px; }
+  .hero-sub { font-size: 14px; }
+}

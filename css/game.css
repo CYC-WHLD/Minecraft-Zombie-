@@ -1,0 +1,331 @@
+/* ===========================================================
+   末日晶核 — 遊戲頁樣式 v8
+   =========================================================== */
+
+.game-body { margin:0; overflow:hidden; background:#1a2028; cursor:default; }
+
+#game-canvas {
+  position:fixed; inset:0; display:block; width:100vw; height:100vh;
+  image-rendering:pixelated;
+}
+
+.hidden { display:none !important; }
+
+body.hit-flash::after {
+  content:''; position:fixed; inset:0; background:rgba(200,20,20,0.25);
+  pointer-events:none; z-index:100; animation:hitFade 0.15s ease-out;
+}
+@keyframes hitFade { from{opacity:1;} to{opacity:0;} }
+
+.scope-overlay { position:fixed; inset:0; z-index:15; pointer-events:none; }
+.scope-overlay canvas { width:100%; height:100%; display:block; }
+
+/* ===== HUD ===== */
+#hud {
+  position:fixed; inset:0; pointer-events:none; z-index:10;
+  font-family:var(--font-cn);
+}
+
+.hud-top {
+  display:flex; justify-content:space-between; align-items:flex-start;
+  padding:16px; gap:12px;
+}
+.hud-left { display:flex; flex-direction:column; gap:10px; }
+
+.hud-chip {
+  display:inline-flex; align-items:center; gap:10px;
+  padding:8px 14px; font-size:16px; letter-spacing:1px;
+  color:#2b2b2b; text-shadow:1px 1px 0 rgba(255,255,255,.6); min-width:140px;
+}
+
+.hud-label {
+  font-family:var(--font-en); font-size:10px; letter-spacing:2px; color:#5a5a5a;
+}
+#hud-timer-value {
+  font-family:var(--font-en); font-size:16px; color:#2b2b2b;
+  min-width:50px; text-align:right;
+}
+
+.hud-cores { display:flex; gap:4px; padding:8px; }
+.core-chip {
+  position:relative; width:42px; height:42px; display:grid; place-items:center;
+  background:#8b8b8b;
+  border:2px solid; border-color:#373737 #ffffff #ffffff #373737;
+  box-shadow:inset 1px 1px 0 #565656;
+}
+.core-icon {
+  width:24px; height:24px; border-radius:50%;
+  box-shadow:inset 0 0 8px rgba(255,255,255,0.5), inset 0 -4px 8px rgba(0,0,0,0.3);
+}
+.core-chip[data-quality="white"]  .core-icon { background:radial-gradient(circle at 30% 30%, #fff, #a0a0a0); }
+.core-chip[data-quality="blue"]   .core-icon { background:radial-gradient(circle at 30% 30%, #a8d4ff, #4a90d9 60%, #1a4a7a); }
+.core-chip[data-quality="purple"] .core-icon { background:radial-gradient(circle at 30% 30%, #d8a8ff, #9b59b6 60%, #4a1a6a); }
+.core-chip[data-quality="red"]    .core-icon { background:radial-gradient(circle at 30% 30%, #ffa8a8, #e74c3c 60%, #7a1a1a); }
+.core-chip[data-quality="key"]    .core-icon {
+  background:radial-gradient(circle at 30% 30%, #fff4a8, #f7d06b 50%, #a57c1c);
+  border-radius:4px; transform:rotate(45deg);
+}
+.core-count {
+  position:absolute; right:2px; bottom:0;
+  font-family:var(--font-en); font-size:9px; color:#fff;
+  text-shadow:1px 1px 0 #000;
+}
+
+.crosshair {
+  position:fixed; left:50%; top:50%; width:22px; height:22px;
+  transform:translate(-50%, -50%); pointer-events:none; mix-blend-mode:difference;
+}
+.crosshair::before, .crosshair::after { content:''; position:absolute; background:#fff; }
+.crosshair::before { left:50%; top:0; width:2px; height:100%; transform:translateX(-50%); }
+.crosshair::after { top:50%; left:0; height:2px; width:100%; transform:translateY(-50%); }
+
+/* ===========================================================
+   底部中央：血量 + 物品欄
+   =========================================================== */
+.hud-bottom-center {
+  position:fixed; left:50%; bottom:18px; transform:translateX(-50%);
+  display:flex; flex-direction:column; align-items:center; gap:6px;
+  pointer-events:none;
+}
+
+.hud-hearts {
+  display:flex; gap:2px;
+  padding:4px 8px;
+  background:rgba(0,0,0,0.45);
+  border:2px solid #000;
+  border-radius:3px;
+  box-shadow:inset 1px 1px 0 rgba(255,255,255,0.1),
+             0 2px 6px rgba(0,0,0,0.4);
+  transition:transform 0.2s ease;
+}
+.hud-hearts.low-hp {
+  animation:heartPulse 0.5s ease-in-out infinite;
+  box-shadow:0 0 12px rgba(231,76,60,0.6),
+             inset 1px 1px 0 rgba(255,255,255,0.1);
+}
+@keyframes heartPulse {
+  0%, 100% { transform:scale(1); }
+  50%      { transform:scale(1.06); }
+}
+
+.heart {
+  position:relative;
+  width:20px; height:20px;
+  image-rendering:pixelated;
+  filter:drop-shadow(1px 1px 0 rgba(0,0,0,0.6));
+}
+.heart::before, .heart::after {
+  content:''; position:absolute; inset:0;
+  background-size:100% 100%; background-repeat:no-repeat; image-rendering:pixelated;
+}
+.heart::before {
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 7 7' shape-rendering='crispEdges'%3E%3Crect x='1' y='0' width='2' height='1' fill='%232a2a2a'/%3E%3Crect x='4' y='0' width='2' height='1' fill='%232a2a2a'/%3E%3Crect x='0' y='1' width='7' height='1' fill='%232a2a2a'/%3E%3Crect x='0' y='2' width='7' height='1' fill='%232a2a2a'/%3E%3Crect x='0' y='3' width='7' height='1' fill='%232a2a2a'/%3E%3Crect x='1' y='4' width='5' height='1' fill='%232a2a2a'/%3E%3Crect x='2' y='5' width='3' height='1' fill='%232a2a2a'/%3E%3Crect x='3' y='6' width='1' height='1' fill='%232a2a2a'/%3E%3C/svg%3E");
+}
+.heart::after {
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 7 7' shape-rendering='crispEdges'%3E%3Crect x='1' y='0' width='2' height='1' fill='%23e74c3c'/%3E%3Crect x='4' y='0' width='2' height='1' fill='%23e74c3c'/%3E%3Crect x='0' y='1' width='7' height='1' fill='%23e74c3c'/%3E%3Crect x='0' y='2' width='7' height='1' fill='%23e74c3c'/%3E%3Crect x='0' y='3' width='7' height='1' fill='%23e74c3c'/%3E%3Crect x='1' y='4' width='5' height='1' fill='%23e74c3c'/%3E%3Crect x='2' y='5' width='3' height='1' fill='%23e74c3c'/%3E%3Crect x='3' y='6' width='1' height='1' fill='%23e74c3c'/%3E%3Crect x='1' y='1' width='1' height='1' fill='%23ff8888'/%3E%3Crect x='5' y='1' width='1' height='1' fill='%23ff8888'/%3E%3C/svg%3E");
+}
+.heart.full::after { clip-path:inset(0 0 0 0); }
+.heart.half::after { clip-path:inset(0 50% 0 0); }
+.heart.empty::after { display:none; }
+
+.hotbar {
+  display:flex; align-items:center; gap:2px;
+  padding:3px;
+  background:rgba(0, 0, 0, .55);
+  border:2px solid #000;
+  pointer-events:none;
+}
+.hotbar-slot {
+  position:relative; width:46px; height:46px;
+  display:grid; place-items:center;
+  background:#8b8b8b;
+  border:2px solid; border-color:#373737 #ffffff #ffffff #373737;
+  box-shadow:inset 1px 1px 0 #565656;
+  transition:transform .08s ease;
+}
+.hotbar-slot.is-active {
+  border-color:#ffffff #373737 #373737 #ffffff;
+  box-shadow:0 0 0 2px #f7d06b, inset 1px 1px 0 #a0a0a0;
+  transform:scale(1.08);
+}
+.hotbar-divider { width:4px; height:36px; background:#000; margin:0 4px; }
+
+.hotbar-icon {
+  width:32px; height:32px;
+  background-size:contain; background-repeat:no-repeat;
+  background-position:center; image-rendering:pixelated;
+}
+
+/* 新的物品欄圖示由 JS 動態生成並注入 */
+.icon-pistol { background-image:var(--icon-pistol); }
+.icon-smg    { background-image:var(--icon-smg); }
+.icon-rifle  { background-image:var(--icon-rifle); }
+.icon-sniper { background-image:var(--icon-sniper); }
+.icon-rocket { background-image:var(--icon-rocket); }
+
+/* 3D 立體方塊圖示 */
+.icon-stone { background-image:var(--icon-stone-3d); }
+.icon-wood  { background-image:var(--icon-wood-3d); }
+.icon-sand  { background-image:var(--icon-sand-3d); }
+.icon-iron  { background-image:var(--icon-iron-3d); }
+
+.hotbar-key {
+  position:absolute; right:2px; bottom:0;
+  font-family:var(--font-en); font-size:8px; color:#fff;
+  text-shadow:1px 1px 0 #000; pointer-events:none;
+}
+
+.ammo-display {
+  position:fixed; right:24px; bottom:118px;
+  font-family:var(--font-en); font-size:18px;
+  color:#f7d06b; text-shadow:2px 2px 0 #000;
+  pointer-events:none; z-index:12; letter-spacing:2px;
+}
+
+/* ===== 暫停選單操作說明 ===== */
+.pause-guide {
+  width:100%; margin:16px 0;
+  background:rgba(0,0,0,0.1);
+  border:2px solid #555;
+  padding:10px;
+  border-radius:4px;
+  color:#3d3d3d;
+}
+.pause-guide summary {
+  cursor:pointer;
+  font-weight:bold;
+  font-size:14px;
+  outline:none;
+}
+.pause-guide summary:hover {
+  color:#000;
+}
+.pause-guide .overlay-keys {
+  margin:12px 0 0 0;
+}
+
+/* ===== 遮罩與其他元件 ===== */
+.overlay {
+  position:fixed; inset:0; z-index:20;
+  display:grid; place-items:center; padding:20px;
+  background:rgba(0,0,0,.6); backdrop-filter:blur(3px);
+  font-family:var(--font-cn);
+}
+.overlay-card { width:min(520px, 100%); padding:32px 28px; text-align:center; }
+.overlay-title {
+  margin:0 0 12px; font-size:28px; letter-spacing:4px; color:#f7d06b;
+  text-shadow:-2px 0 0 #3b2a12, 2px 0 0 #3b2a12,
+              0 -2px 0 #3b2a12, 0 2px 0 #3b2a12, 0 5px 0 rgba(0,0,0,.3);
+}
+.overlay-sub { margin:0 0 20px; font-size:15px; line-height:1.9; color:#3d3d3d; }
+.overlay-best { margin:0 0 24px; font-family:var(--font-en); font-size:11px; color:#6b6b6b; }
+
+.overlay-keys {
+  display:grid; gap:10px; margin:0 0 20px; padding:0;
+  list-style:none; font-size:14px; color:#3d3d3d; text-align:left;
+}
+.overlay-keys li { display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
+
+kbd {
+  display:inline-block; min-width:24px; padding:3px 6px;
+  font-family:var(--font-cn); font-size:12px; color:#fff;
+  background:#3b3b3b; border:2px solid #000;
+  box-shadow:inset -2px -2px 0 rgba(0,0,0,.4), inset 2px 2px 0 rgba(255,255,255,.2);
+  text-align:center;
+}
+
+.overlay-link {
+  display:block; margin-top:20px; font-size:13px; color:#5a5a5a; text-decoration:none;
+}
+.overlay-link:hover { color:#2b2b2b; }
+
+/* ===== 背包 + 合成台 ===== */
+.inventory-panel { width:min(760px, 100%); padding:24px; }
+.inventory-layout {
+  display:flex; gap:24px; justify-content:center;
+  align-items:flex-start; flex-wrap:wrap;
+}
+.inventory-left, .inventory-right { flex:1; min-width:240px; }
+.panel-label {
+  font-size:14px; letter-spacing:2px; color:#5a5a5a; margin:0 0 10px; text-align:left;
+}
+.inv-grid { display:grid; grid-template-columns:repeat(2, 1fr); gap:10px; }
+.inv-slot {
+  position:relative; display:flex; align-items:center; gap:8px;
+  padding:8px 12px; background:#8b8b8b;
+  border:2px solid; border-color:#373737 #ffffff #ffffff #373737;
+  box-shadow:inset 1px 1px 0 #565656;
+  cursor:pointer; user-select:none; transition:transform .08s ease;
+}
+.inv-slot:active { transform:scale(0.98); }
+.inv-slot.empty { opacity:.35; cursor:not-allowed; }
+.inv-slot-icon {
+  width:28px; height:28px; border-radius:50%;
+  box-shadow:inset 0 0 6px rgba(255,255,255,0.5), inset 0 -3px 6px rgba(0,0,0,0.3);
+  flex-shrink:0;
+}
+.inv-slot-icon.core-white  { background:radial-gradient(circle at 30% 30%, #fff, #a0a0a0); }
+.inv-slot-icon.core-blue   { background:radial-gradient(circle at 30% 30%, #a8d4ff, #4a90d9 60%, #1a4a7a); }
+.inv-slot-icon.core-purple { background:radial-gradient(circle at 30% 30%, #d8a8ff, #9b59b6 60%, #4a1a6a); }
+.inv-slot-icon.core-red    { background:radial-gradient(circle at 30% 30%, #ffa8a8, #e74c3c 60%, #7a1a1a); }
+.inv-slot-icon.core-key    { background:radial-gradient(circle at 30% 30%, #fff4a8, #f7d06b 50%, #a57c1c); border-radius:4px; }
+
+.inv-slot-name { font-size:13px; color:#2b2b2b; flex:1; text-align:left; }
+.inv-slot-count { font-family:var(--font-en); font-size:12px; color:#2b2b2b; }
+
+.craft-area { display:flex; align-items:center; justify-content:center; gap:12px; }
+.craft-grid { display:grid; grid-template-columns:repeat(3, 52px); gap:3px; }
+.craft-cell {
+  width:52px; height:52px; display:grid; place-items:center;
+  background:#8b8b8b;
+  border:2px solid; border-color:#373737 #ffffff #ffffff #373737;
+  box-shadow:inset 1px 1px 0 #565656;
+  position:relative; cursor:pointer;
+}
+.craft-cell.filled { border-color:#ffffff #373737 #373737 #ffffff; }
+.craft-cell .cell-icon {
+  width:32px; height:32px; border-radius:50%;
+  box-shadow:inset 0 0 6px rgba(255,255,255,0.5), inset 0 -3px 6px rgba(0,0,0,0.3);
+}
+.craft-cell .cell-icon.core-white  { background:radial-gradient(circle at 30% 30%, #fff, #a0a0a0); }
+.craft-cell .cell-icon.core-blue   { background:radial-gradient(circle at 30% 30%, #a8d4ff, #4a90d9 60%, #1a4a7a); }
+.craft-cell .cell-icon.core-purple { background:radial-gradient(circle at 30% 30%, #d8a8ff, #9b59b6 60%, #4a1a6a); }
+.craft-cell .cell-icon.core-red    { background:radial-gradient(circle at 30% 30%, #ffa8a8, #e74c3c 60%, #7a1a1a); }
+.craft-cell .cell-icon.core-key    { background:radial-gradient(circle at 30% 30%, #fff4a8, #f7d06b 50%, #a57c1c); border-radius:4px; transform:rotate(45deg); }
+.craft-cell .cell-count {
+  position:absolute; right:2px; bottom:0;
+  font-family:var(--font-en); font-size:9px; color:#fff;
+  text-shadow:1px 1px 0 #000;
+}
+.craft-arrow { font-size:28px; color:#f7d06b; text-shadow:2px 2px 0 #000; }
+.result-cell { width:60px; height:60px; cursor:default; }
+.result-cell.has-result {
+  box-shadow:0 0 0 2px #f7d06b, inset 1px 1px 0 #a0a0a0;
+  cursor:pointer;
+}
+.result-cell.has-result:hover { background:#a0a0a0; }
+.craft-hint { font-size:11px; color:#6b6b6b; margin-top:8px; text-align:center; }
+.inventory-actions { text-align:center; margin-top:20px; }
+
+@media (max-width:600px) {
+  .hud-chip { font-size:13px; min-width:100px; padding:6px 10px; }
+  #hud-timer-value { font-size:13px; }
+  .hud-cores { gap:2px; padding:4px; }
+  .core-chip { width:34px; height:34px; }
+  .core-icon { width:18px; height:18px; }
+  .core-count { font-size:8px; }
+  .overlay-title { font-size:22px; letter-spacing:2px; }
+  .overlay-card { padding:24px 18px; }
+
+  .heart { width:16px; height:16px; }
+  .hotbar-slot { width:36px; height:36px; }
+  .hotbar-icon { width:24px; height:24px; }
+  .hotbar-key { font-size:7px; }
+  .hotbar-divider { display:none; }
+  .ammo-display { font-size:14px; bottom:90px; right:16px; }
+
+  .inventory-layout { flex-direction:column; }
+  .craft-grid { grid-template-columns:repeat(3, 42px); }
+  .craft-cell { width:42px; height:42px; }
+  .result-cell { width:50px; height:50px; }
+}

@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>末日晶核 · 廢土生存</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/game.css">
+
+<script type="importmap">
+{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js" } }
+</script>
+</head>
+<body class="game-body">
+
+<canvas id="game-canvas"></canvas>
+
+<!-- 倍鏡 overlay -->
+<div id="scope-overlay" class="scope-overlay hidden">
+  <canvas id="scope-canvas"></canvas>
+</div>
+
+<!-- ===== HUD ===== -->
+<div id="hud" class="hidden">
+  <div class="hud-top">
+    <div class="hud-left">
+      <div class="mc-panel hud-chip hud-timer">
+        <span class="hud-label">TIME</span>
+        <span id="hud-timer-value">0.0</span>
+      </div>
+    </div>
+
+    <div class="hud-right">
+      <div class="mc-panel hud-cores">
+        <div class="core-chip" data-quality="white">
+          <span class="core-icon"></span><span class="core-count" id="hud-core-white">0</span>
+        </div>
+        <div class="core-chip" data-quality="blue">
+          <span class="core-icon"></span><span class="core-count" id="hud-core-blue">0</span>
+        </div>
+        <div class="core-chip" data-quality="purple">
+          <span class="core-icon"></span><span class="core-count" id="hud-core-purple">0</span>
+        </div>
+        <div class="core-chip" data-quality="red">
+          <span class="core-icon"></span><span class="core-count" id="hud-core-red">0</span>
+        </div>
+        <div class="core-chip" data-quality="key">
+          <span class="core-icon"></span><span class="core-count" id="hud-core-key">0</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="crosshair" id="crosshair" aria-hidden="true"></div>
+
+  <!-- 底部中央：血量 + 物品欄 -->
+  <div class="hud-bottom-center">
+    <div id="hud-hearts" class="hud-hearts"></div>
+
+    <div id="hotbar" class="hotbar">
+      <div class="hotbar-slot is-active" data-slot="0" data-type="weapon" data-weapon="pistol">
+        <span class="hotbar-icon icon-pistol"></span><span class="hotbar-key">1</span>
+      </div>
+      <div class="hotbar-slot" data-slot="1" data-type="weapon" data-weapon="smg">
+        <span class="hotbar-icon icon-smg"></span><span class="hotbar-key">2</span>
+      </div>
+      <div class="hotbar-slot" data-slot="2" data-type="weapon" data-weapon="rifle">
+        <span class="hotbar-icon icon-rifle"></span><span class="hotbar-key">3</span>
+      </div>
+      <div class="hotbar-slot" data-slot="3" data-type="weapon" data-weapon="sniper">
+        <span class="hotbar-icon icon-sniper"></span><span class="hotbar-key">4</span>
+      </div>
+      <div class="hotbar-slot" data-slot="4" data-type="weapon" data-weapon="rocket">
+        <span class="hotbar-icon icon-rocket"></span><span class="hotbar-key">5</span>
+      </div>
+
+      <div class="hotbar-divider"></div>
+
+      <div class="hotbar-slot" data-slot="5" data-type="block" data-block="stone">
+        <span class="hotbar-icon icon-stone"></span><span class="hotbar-key">6</span>
+      </div>
+      <div class="hotbar-slot" data-slot="6" data-type="block" data-block="wood">
+        <span class="hotbar-icon icon-wood"></span><span class="hotbar-key">7</span>
+      </div>
+      <div class="hotbar-slot" data-slot="7" data-type="block" data-block="sand">
+        <span class="hotbar-icon icon-sand"></span><span class="hotbar-key">8</span>
+      </div>
+      <div class="hotbar-slot" data-slot="8" data-type="block" data-block="iron">
+        <span class="hotbar-icon icon-iron"></span><span class="hotbar-key">9</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="ammo-display" id="ammo-display">12 / ∞</div>
+  <!-- 移除底部提示列 -->
+</div>
+
+<!-- ===== 主選單 ===== -->
+<div id="overlay-menu" class="overlay">
+  <div class="mc-panel overlay-card">
+    <h1 class="overlay-title">末日晶核</h1>
+    <p class="overlay-sub">擊殺喪屍、收集晶核、合成扭曲之鑰<br>穿越十年後的廢土，尋找沒有喪屍的未來</p>
+    <button id="btn-start" class="mc-btn mc-btn--lg">開始生存</button>
+    <a href="index.html" class="overlay-link">← 回首頁</a>
+  </div>
+</div>
+
+<!-- ===== 暫停（包含操作說明） ===== -->
+<div id="overlay-pause" class="overlay hidden">
+  <div class="mc-panel overlay-card">
+    <h2 class="overlay-title">已暫停</h2>
+    
+    <!-- 可展開的操作說明 -->
+    <details class="pause-guide">
+      <summary>查看操作說明</summary>
+      <ul class="overlay-keys">
+        <li><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> 移動　<kbd>空白</kbd> 跳躍</li>
+        <li><kbd>左鍵</kbd> 射擊 / 挖掘　<kbd>右鍵</kbd> 開鏡 / 放置方塊</li>
+        <li><kbd>1</kbd>–<kbd>5</kbd> 切換槍枝　<kbd>6</kbd>–<kbd>9</kbd> 切換建材</li>
+        <li><kbd>E</kbd> 背包 / 合成　<kbd>R</kbd> 換彈</li>
+      </ul>
+    </details>
+
+    <button id="btn-resume" class="mc-btn mc-btn--lg" style="margin-top: 16px;">繼續遊戲</button>
+    <a href="index.html" class="overlay-link">← 回首頁</a>
+  </div>
+</div>
+
+<!-- ===== 結果 ===== -->
+<div id="overlay-result" class="overlay hidden">
+  <div class="mc-panel overlay-card">
+    <h2 id="result-title" class="overlay-title">時間到！</h2>
+    <p id="result-text" class="overlay-sub"></p>
+    <p id="result-best" class="overlay-best"></p>
+    <button id="btn-restart" class="mc-btn mc-btn--lg">再玩一次</button>
+    <a href="index.html" class="overlay-link">← 回首頁</a>
+  </div>
+</div>
+
+<!-- ===== 背包 + 合成台 ===== -->
+<div id="overlay-inventory" class="overlay hidden">
+  <div class="mc-panel inventory-panel">
+    <h2 class="overlay-title" style="font-size:22px; margin-bottom:18px;">背包</h2>
+
+    <div class="inventory-layout">
+      <div class="inventory-left">
+        <h3 class="panel-label">材料</h3>
+        <div class="inv-grid" id="inv-grid"></div>
+      </div>
+
+      <div class="inventory-right">
+        <h3 class="panel-label">合成</h3>
+        <div class="craft-area">
+          <div class="craft-grid" id="craft-grid">
+            <div class="craft-cell" data-cell="0"></div>
+            <div class="craft-cell" data-cell="1"></div>
+            <div class="craft-cell" data-cell="2"></div>
+            <div class="craft-cell" data-cell="3"></div>
+            <div class="craft-cell" data-cell="4"></div>
+            <div class="craft-cell" data-cell="5"></div>
+            <div class="craft-cell" data-cell="6"></div>
+            <div class="craft-cell" data-cell="7"></div>
+            <div class="craft-cell" data-cell="8"></div>
+          </div>
+          <div class="craft-arrow">➜</div>
+          <div class="craft-result-area">
+            <div class="craft-cell result-cell" data-cell="result" id="craft-result-cell"></div>
+          </div>
+        </div>
+        <p class="craft-hint">點擊材料自動填入</p>
+      </div>
+    </div>
+
+    <div class="inventory-actions">
+      <button class="mc-btn" id="btn-close-inventory">關閉 (E)</button>
+    </div>
+  </div>
+</div>
+
+<script type="module" src="js/game.js"></script>
+</body>
+</html>
